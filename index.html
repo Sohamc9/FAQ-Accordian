@@ -1,0 +1,1725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple FAQ Accordion - Powered by Wikipedia</title>
+  <style>
+    /* CSS Variables for Light and Dark Modes */
+    :root {
+      --bg-page: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-input: #ffffff;
+      --text-heading: #0f172a;
+      --text-body: #334155;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --border-hover: #cbd5e1;
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --primary-light: #eef2ff;
+      --primary-border: #c7d2fe;
+      --icon-bg: #f1f5f9;
+      --icon-color: #4f46e5;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+      --shadow-active: 0 8px 20px -2px rgba(79, 70, 229, 0.15);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-full: 9999px;
+      --pill-bg: #f1f5f9;
+      --pill-hover: #e2e8f0;
+      --pill-text: #475569;
+      --alert-info-bg: #eff6ff;
+      --alert-info-border: #bfdbfe;
+      --alert-info-text: #1e40af;
+      --alert-warn-bg: #fffbeb;
+      --alert-warn-border: #fde68a;
+      --alert-warn-text: #92400e;
+      --alert-error-bg: #fef2f2;
+      --alert-error-border: #fecaca;
+      --alert-error-text: #991b1b;
+    }
+
+    /* Dark Mode Theme */
+    [data-theme="dark"] {
+      --bg-page: #0b0f19;
+      --bg-card: #151d2e;
+      --bg-input: #1a2338;
+      --text-heading: #f8fafc;
+      --text-body: #cbd5e1;
+      --text-muted: #8896ab;
+      --border-color: #243049;
+      --border-hover: #334155;
+      --primary: #6366f1;
+      --primary-hover: #818cf8;
+      --primary-light: #1e1e38;
+      --primary-border: #3730a3;
+      --icon-bg: #1e293b;
+      --icon-color: #a5b4fc;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 10px 20px -3px rgba(0, 0, 0, 0.5);
+      --shadow-active: 0 8px 24px -2px rgba(99, 102, 241, 0.25);
+      --pill-bg: #1e293b;
+      --pill-hover: #2d3d57;
+      --pill-text: #cbd5e1;
+      --alert-info-bg: #172554;
+      --alert-info-border: #1e3a8a;
+      --alert-info-text: #93c5fd;
+      --alert-warn-bg: #451a03;
+      --alert-warn-border: #78350f;
+      --alert-warn-text: #fde68a;
+      --alert-error-bg: #450a0a;
+      --alert-error-border: #7f1d1d;
+      --alert-error-text: #fca5a5;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-page);
+      color: var(--text-body);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.6;
+      transition: background-color 0.25s ease, color 0.25s ease;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Header Nav */
+    .header-bar {
+      width: 100%;
+      border-bottom: 1px solid var(--border-color);
+      background-color: var(--bg-card);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      transition: background-color 0.25s ease, border-color 0.25s ease;
+    }
+
+    .header-container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--text-heading);
+      text-decoration: none;
+    }
+
+    .brand-icon {
+      width: 28px;
+      height: 28px;
+      background: var(--primary);
+      color: #ffffff;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.95rem;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .lang-select-wrapper {
+      position: relative;
+    }
+
+    .lang-select {
+      appearance: none;
+      -webkit-appearance: none;
+      background-color: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-heading);
+      padding: 7px 32px 7px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      font-family: inherit;
+    }
+
+    .lang-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+    }
+
+    .lang-chevron {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: var(--text-muted);
+      width: 14px;
+      height: 14px;
+    }
+
+    .theme-toggle-btn {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-heading);
+      padding: 7px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
+
+    .theme-toggle-btn:hover {
+      background-color: var(--pill-hover);
+    }
+
+    /* Main Container */
+    .main-content {
+      max-width: 860px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 40px 20px 60px 20px;
+      flex: 1;
+    }
+
+    /* Hero / Intro */
+    .hero-section {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background-color: var(--primary-light);
+      border: 1px solid var(--primary-border);
+      color: var(--primary);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+      margin-bottom: 16px;
+    }
+
+    .hero-title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--text-heading);
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 12px;
+    }
+
+    .hero-subtitle {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 580px;
+      margin: 0 auto;
+    }
+
+    /* Search Box Form */
+    .search-box-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 8px;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 24px;
+      transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .search-box-card:focus-within {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15), var(--shadow-md);
+    }
+
+    .search-form {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .search-icon-box {
+      padding-left: 14px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .search-input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 12px 10px;
+      font-size: 1.05rem;
+      color: var(--text-heading);
+      outline: none;
+      font-family: inherit;
+      min-width: 0;
+    }
+
+    .search-input::placeholder {
+      color: var(--text-muted);
+      opacity: 0.8;
+    }
+
+    .search-btn {
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      padding: 12px 24px;
+      border-radius: var(--radius-md);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: background-color 0.15s ease, transform 0.1s ease;
+      flex-shrink: 0;
+      font-family: inherit;
+    }
+
+    .search-btn:hover {
+      background: var(--primary-hover);
+    }
+
+    .search-btn:active {
+      transform: scale(0.98);
+    }
+
+    /* Example Chips */
+    .sample-chips-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 32px;
+      font-size: 0.85rem;
+    }
+
+    .sample-label {
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-right: 4px;
+    }
+
+    .sample-chip {
+      background: var(--pill-bg);
+      border: 1px solid var(--border-color);
+      color: var(--pill-text);
+      padding: 5px 12px;
+      border-radius: var(--radius-full);
+      font-size: 0.825rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+
+    .sample-chip:hover {
+      background: var(--pill-hover);
+      color: var(--text-heading);
+      border-color: var(--border-hover);
+    }
+
+    /* Results Header */
+    .results-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 18px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .results-heading {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-heading);
+    }
+
+    .results-topic-badge {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    /* Status Messages (Cards) */
+    .status-card {
+      border-radius: var(--radius-md);
+      padding: 20px 24px;
+      margin: 24px 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      border: 1px solid transparent;
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    .status-card.info {
+      background-color: var(--alert-info-bg);
+      border-color: var(--alert-info-border);
+      color: var(--alert-info-text);
+    }
+
+    .status-card.warning {
+      background-color: var(--alert-warn-bg);
+      border-color: var(--alert-warn-border);
+      color: var(--alert-warn-text);
+    }
+
+    .status-card.error {
+      background-color: var(--alert-error-bg);
+      border-color: var(--alert-error-border);
+      color: var(--alert-error-text);
+    }
+
+    .status-icon-box {
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .status-title {
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 4px;
+    }
+
+    .status-desc {
+      font-size: 0.925rem;
+      line-height: 1.5;
+    }
+
+    .disambig-suggestions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .disambig-pill {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-heading);
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+
+    .disambig-pill:hover {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+
+    /* Loading Spinner */
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      gap: 16px;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    .loading-spinner {
+      width: 44px;
+      height: 44px;
+      border: 4px solid var(--border-color);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    .loading-label {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    /* Accordion Styles */
+    .accordion-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .faq-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .faq-item:hover {
+      border-color: var(--border-hover);
+    }
+
+    .faq-item.is-open {
+      border-color: var(--primary);
+      box-shadow: var(--shadow-active);
+    }
+
+    .faq-question-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 20px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      text-align: left;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text-heading);
+      gap: 16px;
+      transition: color 0.2s ease;
+      font-family: inherit;
+      outline: none;
+    }
+
+    .faq-question-btn:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: -2px;
+    }
+
+    .faq-question-btn:hover {
+      color: var(--primary);
+    }
+
+    .faq-item.is-open .faq-question-btn {
+      color: var(--primary);
+    }
+
+    .faq-q-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      background-color: var(--pill-bg);
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      margin-right: 10px;
+      flex-shrink: 0;
+    }
+
+    .faq-item.is-open .faq-q-number {
+      background-color: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .faq-question-text {
+      flex: 1;
+      line-height: 1.45;
+    }
+
+    .faq-icon-wrapper {
+      flex-shrink: 0;
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-full);
+      background: var(--icon-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--icon-color);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .faq-icon {
+      width: 18px;
+      height: 18px;
+      transition: transform 0.3s ease;
+    }
+
+    /* Transform plus icon to 'x' when opened */
+    .faq-item.is-open .faq-icon-wrapper {
+      transform: rotate(45deg);
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    /* Smooth accordion animation via max-height (works universally on all browsers) */
+    .faq-answer-panel {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .faq-answer-content {
+      padding: 0 20px 20px 20px;
+    }
+
+    .faq-answer-text {
+      margin: 0;
+      font-size: 0.985rem;
+      line-height: 1.68;
+      color: var(--text-body);
+      border-top: 1px solid var(--border-color);
+      padding-top: 14px;
+    }
+
+    /* Wikipedia Article Footer Citation */
+    .article-footer {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .article-footer-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    .wiki-icon {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    .article-footer-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--primary);
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+
+    .article-footer-link:hover {
+      text-decoration: underline;
+      color: var(--primary-hover);
+    }
+
+    /* Page Footer */
+    .page-footer {
+      border-top: 1px solid var(--border-color);
+      background: var(--bg-card);
+      padding: 24px 20px;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: auto;
+    }
+
+    .page-footer p {
+      max-width: 650px;
+      margin: 0 auto 6px auto;
+    }
+
+    /* Animations */
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 640px) {
+      .hero-title {
+        font-size: 1.85rem;
+      }
+      .hero-subtitle {
+        font-size: 0.975rem;
+      }
+      .search-form {
+        flex-direction: column;
+      }
+      .search-btn {
+        width: 100%;
+        justify-content: center;
+      }
+      .faq-question-btn {
+        padding: 14px 16px;
+        font-size: 0.975rem;
+      }
+      .faq-answer-content {
+        padding: 0 16px 16px 16px;
+      }
+      .article-footer {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <header class="header-bar">
+    <div class="header-container">
+      <a href="#" class="brand-badge" id="brand-link">
+        <span class="brand-icon">?</span>
+        <span id="brand-text">FAQ Accordion</span>
+      </a>
+      <div class="header-controls">
+        <!-- Language Selector -->
+        <div class="lang-select-wrapper">
+          <label for="lang-select" class="visually-hidden" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0);">Language</label>
+          <select id="lang-select" class="lang-select" title="Choose Language">
+            <option value="en" selected>English</option>
+            <option value="hi">हिन्दी (Hindi)</option>
+            <option value="mr">मराठी (Marathi)</option>
+            <option value="es">Español (Spanish)</option>
+            <option value="fr">Français (French)</option>
+            <option value="de">Deutsch (German)</option>
+          </select>
+          <svg class="lang-chevron" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+        </div>
+
+        <!-- Light / Dark Mode Toggle Button -->
+        <button id="theme-toggle" class="theme-toggle-btn" type="button" aria-label="Toggle light/dark theme" title="Toggle Theme">
+          <!-- Sun Icon (shown in dark mode) -->
+          <svg id="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <!-- Moon Icon (shown in light mode) -->
+          <svg id="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-content">
+    
+    <!-- Hero / Headline Section -->
+    <section class="hero-section">
+      <div class="hero-badge" id="hero-badge">Free & Open Knowledge</div>
+      <h1 class="hero-title" id="hero-title">Simple FAQ Accordion</h1>
+      <p class="hero-subtitle" id="hero-subtitle">Type any topic in the world to instantly generate an interactive FAQ powered by Wikipedia.</p>
+    </section>
+
+    <!-- Search Box Card -->
+    <section class="search-box-card">
+      <form id="search-form" class="search-form">
+        <div class="search-icon-box">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </div>
+        <input 
+          type="text" 
+          id="search-input" 
+          class="search-input" 
+          placeholder="Search any topic (e.g. Photosynthesis, Roman Empire)..." 
+          autocomplete="off" 
+          required
+        />
+        <button type="submit" id="search-btn" class="search-btn">
+          <span id="search-btn-text">Search</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </button>
+      </form>
+    </section>
+
+    <!-- Suggested Sample Chips -->
+    <div class="sample-chips-row">
+      <span class="sample-label" id="sample-label">Try:</span>
+      <div id="sample-chips-container" style="display:inline-flex; flex-wrap:wrap; gap:8px;"></div>
+    </div>
+
+    <!-- Live Status & Feedback Area -->
+    <div id="status-area" role="status" aria-live="polite"></div>
+
+    <!-- Accordion & Results Area (Hidden initially) -->
+    <section id="results-section" style="display: none;">
+      <div class="results-meta">
+        <h2 class="results-heading" id="results-heading">Frequently Asked Questions</h2>
+        <span class="results-topic-badge" id="results-topic-badge"></span>
+      </div>
+
+      <!-- Accordion Questions Container -->
+      <div id="accordion-container" class="accordion-list"></div>
+
+      <!-- Wikipedia Source Attribution & Link -->
+      <div class="article-footer" id="article-footer">
+        <div class="article-footer-left">
+          <svg class="wiki-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12.09 13.124l2.647-7.246h2.274l-4.108 10.366h-1.574l-2.483-6.524-2.52 6.524H4.75L.641 5.878H2.97l2.678 7.246 2.05-5.385-1.09-2.008.204-.147 3.535.147 2.05 5.394zm5.556-7.246l-1.002 2.76 2.457 6.136 2.502-6.524h2.247L19.742 16.244h-1.558l-3.355-8.366 1.817-2.008z"/>
+          </svg>
+          <span id="footer-credit-text">Information sourced from Wikipedia, the free encyclopedia.</span>
+        </div>
+        <a id="wiki-article-link" class="article-footer-link" href="#" target="_blank" rel="noopener noreferrer">
+          <span id="footer-link-text">Read full article on Wikipedia</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" y1="14" x2="21" y2="3"></line>
+          </svg>
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Page Footer -->
+  <footer class="page-footer">
+    <p id="page-footer-about">Simple FAQ Accordion - School Project Submission.</p>
+    <p id="page-footer-disclaimer">Zero API keys, zero tracking, zero accounts. Content dynamically retrieved from Wikipedia APIs.</p>
+  </footer>
+
+  <script>
+    /* ==========================================================================
+       Language & Internationalization Data Dictionary
+       ========================================================================== */
+    var I18N = {
+      en: {
+        brand: 'FAQ Accordion',
+        badge: 'Free & Open Knowledge',
+        title: 'Simple FAQ Accordion',
+        subtitle: 'Type any topic in the world to instantly generate an interactive FAQ powered by Wikipedia.',
+        placeholder: 'Search any topic (e.g. Photosynthesis, Roman Empire)...',
+        searchBtn: 'Search',
+        tryLabel: 'Try:',
+        samples: ['Photosynthesis', 'Roman Empire', 'Black Hole', 'Artificial Intelligence', 'Solar System'],
+        resultsHeading: 'Frequently Asked Questions',
+        searching: 'Searching Wikipedia articles...',
+        loadingContent: 'Reading article and building FAQ...',
+        noResultsTitle: 'No Article Found',
+        noResultsDesc: 'We could not find any Wikipedia article matching "{query}". Try checking your spelling or searching for a broader subject.',
+        disambigTitle: 'Multiple Meanings Detected',
+        disambigDesc: 'This topic has several meanings on Wikipedia. Please select one of the specific subjects below or refine your search:',
+        tooShortTitle: 'Article Too Brief',
+        tooShortDesc: 'The Wikipedia article for "{query}" is too short to generate a multi-question FAQ. Try exploring a more comprehensive topic.',
+        offlineTitle: 'No Internet Connection',
+        offlineDesc: 'Please check your network connection. An active internet connection is needed to fetch articles from Wikipedia.',
+        errorTitle: 'Search Error',
+        errorDesc: 'An error occurred while fetching information from Wikipedia: ',
+        credit: 'Information sourced from Wikipedia, the free encyclopedia.',
+        readArticle: 'Read full article on Wikipedia',
+        footerAbout: 'Simple FAQ Accordion - School Project Submission.',
+        footerDisclaimer: 'Zero API keys, zero tracking, zero accounts. Content dynamically retrieved from Wikipedia APIs.',
+        introQuestion: function(topic) { return 'What is ' + topic + '?'; },
+        sectionQuestion: function(section, topic) { return 'What should you know about ' + section + ' in ' + topic + '?'; },
+        skipSections: ['see also', 'references', 'external links', 'further reading', 'notes', 'bibliography', 'sources', 'citations', 'gallery', 'navigation menu', 'contents', 'footers', 'publications']
+      },
+      hi: {
+        brand: 'सरल FAQ एकॉर्डियन',
+        badge: 'मुफ़्त एवं खुला ज्ञान',
+        title: 'सरल अक्सर पूछे जाने वाले प्रश्न (FAQ)',
+        subtitle: 'दुनिया के किसी भी विषय को टाइप करें और विकिपीडिया द्वारा संचालित इंटरैक्टिव FAQ प्राप्त करें।',
+        placeholder: 'कोई भी विषय खोजें (उदा. प्रकाश संश्लेषण, ताजमहल, सौर मंडल)...',
+        searchBtn: 'खोजें',
+        tryLabel: 'सुझाव:',
+        samples: ['प्रकाश संश्लेषण', 'ताजमहल', 'सौर मंडल', 'मौर्य साम्राज्य', 'हिमालय'],
+        resultsHeading: 'अक्सर पूछे जाने वाले प्रश्न',
+        searching: 'विकिपीडिया पर खोज जारी है...',
+        loadingContent: 'लेख पढ़ा जा रहा है और FAQ तैयार किया जा रहा है...',
+        noResultsTitle: 'कोई लेख नहीं मिला',
+        noResultsDesc: '"{query}" के लिए कोई विकिपीडिया लेख नहीं मिला। कृपया वर्तनी जांचें या कोई अन्य विषय खोजें।',
+        disambigTitle: 'इस विषय के कई अर्थ हैं',
+        disambigDesc: 'विकिपीडिया पर इस विषय के कई अर्थ हैं। कृपया नीचे दिए गए विशिष्ट विषयों में से एक चुनें:',
+        tooShortTitle: 'लेख बहुत छोटा है',
+        tooShortDesc: '"{query}" का लेख FAQ बनाने के लिए पर्याप्त बड़ा नहीं है। कृपया किसी अधिक विस्तृत विषय पर खोज करें।',
+        offlineTitle: 'इंटरनेट कनेक्शन नहीं है',
+        offlineDesc: 'कृपया अपना नेटवर्क कनेक्शन जांचें। विकिपीडिया से डेटा प्राप्त करने के लिए इंटरनेट आवश्यक है।',
+        errorTitle: 'खोज त्रुटि',
+        errorDesc: 'विकिपीडिया से जानकारी प्राप्त करते समय त्रुटि हुई: ',
+        credit: 'यह जानकारी विकिपीडिया (मुफ़्त ज्ञानकोश) से ली गई है।',
+        readArticle: 'विकिपीडिया पर पूरा लेख पढ़ें',
+        footerAbout: 'सरल FAQ एकॉर्डियन - स्कूल प्रोजेक्ट सबमिशन।',
+        footerDisclaimer: 'शून्य API कुंजी, शून्य ट्रैकिंग। विकिपीडिया API द्वारा संचालित।',
+        introQuestion: function(topic) { return topic + ' क्या है?'; },
+        sectionQuestion: function(section, topic) { return topic + ': ' + section + ' के बारे में क्या जानकारी है?'; },
+        skipSections: ['इन्हें भी देखें', 'संदर्भ', 'बाहरी कड़ियाँ', 'स्रोत', 'टिप्पणियाँ', 'ग्रंथसूची', 'और देखें', 'बाहरी सूत्र', 'संबंधित लेख']
+      },
+      mr: {
+        brand: 'सोपे FAQ एकॉर्डियन',
+        badge: 'मुक्त आणि मोफत ज्ञान',
+        title: 'सोपे वारंवार विचारले जाणारे प्रश्न (FAQ)',
+        subtitle: 'कोणताही विषय टाइप करा आणि विकिपीडिया द्वारे तयार केलेले परस्परसंवादी FAQ मिळवा.',
+        placeholder: 'कोणताही विषय शोधा (उदा. प्रकाशसंश्लेषण, शिवाजी महाराज, सूर्यमाला)...',
+        searchBtn: 'शोधा',
+        tryLabel: 'उदाहरणे:',
+        samples: ['प्रकाशसंश्लेषण', 'छत्रपती शिवाजी महाराज', 'सूर्यमाला', 'सह्याद्री', 'महाराष्ट्र'],
+        resultsHeading: 'वारंवार विचारले जाणारे प्रश्न',
+        searching: 'विकिपीडियावर शोधत आहे...',
+        loadingContent: 'माहिती गोळा करून प्रश्नोत्तरे तयार केली जात आहेत...',
+        noResultsTitle: 'लेख सापडला नाही',
+        noResultsDesc: '"{query}" साठी कोणताही विकिपीडिया लेख सापडला नाही. कृपया शब्द तपासा किंवा वेगळा विषय शोधा.',
+        disambigTitle: 'या विषयाचे अनेक अर्थ आहेत',
+        disambigDesc: 'या विषयाचे अनेक संदर्भ आहेत. कृपया खालीलपैकी एक विशिष्ट विषय निवडा:',
+        tooShortTitle: 'लेख खूप लहान आहे',
+        tooShortDesc: '"{query}" वरील लेख FAQ तयार करण्यासाठी खूप छोटा आहे. कृपया अधिक सविस्तर विषय शोधा.',
+        offlineTitle: 'इंटरनेट कनेक्शन नाही',
+        offlineDesc: 'कृपया आपले नेटवर्क तपासा. विकिपीडिया वरून माहिती मिळवण्यासाठी इंटरनेट आवश्यक आहे.',
+        errorTitle: 'त्रुटी आली',
+        errorDesc: 'विकिपीडियाकडून माहिती मिळवताना त्रुटी आली: ',
+        credit: 'ही माहिती विकिपीडिया (मुक्त ज्ञानकोश) वरून घेतली आहे.',
+        readArticle: 'विकिपीडियावर संपूर्ण लेख वाचा',
+        footerAbout: 'सोपे FAQ एकॉर्डियन - शाळा प्रकल्प सादरीकरण.',
+        footerDisclaimer: 'कोणतीही API की नाही, पूर्णपणे मोफत. विकिपीडिया API द्वारे समर्थित.',
+        introQuestion: function(topic) { return topic + ' म्हणजे काय?'; },
+        sectionQuestion: function(section, topic) { return topic + ' मधील ' + section + ' बद्दल काय माहिती आहे?'; },
+        skipSections: ['हे सुद्धा पहा', 'हे ही पहा', 'संदर्भ', 'बाह्य दुवे', 'नोंदी', 'संदर्भ आणि नोंदी', 'तळटीपा', 'पुस्तके']
+      },
+      es: {
+        brand: 'FAQ Acordeón',
+        badge: 'Conocimiento Libre y Gratuito',
+        title: 'Preguntas Frecuentes (FAQ)',
+        subtitle: 'Escribe cualquier tema del mundo para generar un FAQ interactivo con información de Wikipedia.',
+        placeholder: 'Busca cualquier tema (ej. Fotosíntesis, Imperio Romano, Agujero Negro)...',
+        searchBtn: 'Buscar',
+        tryLabel: 'Prueba:',
+        samples: ['Fotosíntesis', 'Imperio Romano', 'Agujero negro', 'Inteligencia artificial', 'Sistema solar'],
+        resultsHeading: 'Preguntas Frecuentes',
+        searching: 'Buscando artículos en Wikipedia...',
+        loadingContent: 'Leyendo el artículo y redactando el FAQ...',
+        noResultsTitle: 'No se encontró el artículo',
+        noResultsDesc: 'No encontramos ningún artículo en Wikipedia para "{query}". Revisa la ortografía o busca un tema más general.',
+        disambigTitle: 'Varios significados detectados',
+        disambigDesc: 'Este tema tiene varios significados en Wikipedia. Elige uno de los temas específicos a continuación:',
+        tooShortTitle: 'Artículo demasiado breve',
+        tooShortDesc: 'El artículo sobre "{query}" es muy breve para generar un FAQ completo. Prueba con un tema más amplio.',
+        offlineTitle: 'Sin conexión a internet',
+        offlineDesc: 'Por favor, comprueba tu red. Se necesita internet para obtener los artículos de Wikipedia.',
+        errorTitle: 'Error de búsqueda',
+        errorDesc: 'Ocurrió un error al cargar la información desde Wikipedia: ',
+        credit: 'Información obtenida de Wikipedia, la enciclopedia libre.',
+        readArticle: 'Leer el artículo completo en Wikipedia',
+        footerAbout: 'Acordeón de Preguntas Frecuentes - Proyecto escolar.',
+        footerDisclaimer: 'Sin claves de API, sin registro, sin rastreo. Alimentado por la API de Wikipedia.',
+        introQuestion: function(topic) { return '¿Qué es ' + topic + '?'; },
+        sectionQuestion: function(section, topic) { return '¿Qué debes saber sobre ' + section + ' en ' + topic + '?'; },
+        skipSections: ['véase también', 'vease tambien', 'referencias', 'enlaces externos', 'bibliografía', 'bibliografia', 'notas', 'fuentes', 'lecturas adicionales']
+      },
+      fr: {
+        brand: 'FAQ Accordéon',
+        badge: 'Savoir Libre et Gratuit',
+        title: 'Foire Aux Questions (FAQ)',
+        subtitle: 'Tapez n\'importe quel sujet pour générer instantanément une FAQ interactive basée sur Wikipédia.',
+        placeholder: 'Rechercher un sujet (ex. Photosynthèse, Empire romain, Trou noir)...',
+        searchBtn: 'Rechercher',
+        tryLabel: 'Exemples :',
+        samples: ['Photosynthèse', 'Empire romain', 'Trou noir', 'Intelligence artificielle', 'Système solaire'],
+        resultsHeading: 'Questions Fréquemment Posées',
+        searching: 'Recherche sur Wikipédia...',
+        loadingContent: 'Lecture de l\'article et création de la FAQ...',
+        noResultsTitle: 'Aucun article trouvé',
+        noResultsDesc: 'Aucun article Wikipédia ne correspond à « {query} ». Vérifiez l\'orthographe ou cherchez un terme plus large.',
+        disambigTitle: 'Plusieurs sens possibles',
+        disambigDesc: 'Ce sujet possède plusieurs définitions sur Wikipédia. Veuillez choisir parmi les sujets précis ci-dessous :',
+        tooShortTitle: 'Article trop court',
+        tooShortDesc: 'L\'article « {query} » est trop court pour générer une FAQ complète. Essayez un sujet plus vaste.',
+        offlineTitle: 'Aucune connexion internet',
+        offlineDesc: 'Veuillez vérifier votre connexion réseau pour pouvoir charger les articles Wikipédia.',
+        errorTitle: 'Erreur de recherche',
+        errorDesc: 'Une erreur est survenue lors de la récupération des données Wikipédia : ',
+        credit: 'Informations issues de Wikipédia, l\'encyclopédie libre.',
+        readArticle: 'Lire l\'article complet sur Wikipédia',
+        footerAbout: 'FAQ Accordéon Simple - Projet scolaire.',
+        footerDisclaimer: 'Sans clé d\'API, sans compte, sans traceur. Données fournies par Wikipédia.',
+        introQuestion: function(topic) { return 'Qu\'est-ce que ' + topic + ' ?'; },
+        sectionQuestion: function(section, topic) { return 'Que faut-il savoir sur ' + section + ' dans ' + topic + ' ?'; },
+        skipSections: ['voir aussi', 'articles connexes', 'références', 'references', 'liens externes', 'bibliographie', 'notes et références', 'notes', 'annexes', 'sources']
+      },
+      de: {
+        brand: 'FAQ Akkordeon',
+        badge: 'Freies & Offenes Wissen',
+        title: 'Häufig Gestellte Fragen (FAQ)',
+        subtitle: 'Gib ein beliebiges Thema ein, um sofort ein interaktives FAQ basierend auf Wikipedia zu erstellen.',
+        placeholder: 'Thema suchen (z. B. Photosynthese, Römisches Reich, Schwarzes Loch)...',
+        searchBtn: 'Suchen',
+        tryLabel: 'Beispiele:',
+        samples: ['Photosynthese', 'Römisches Reich', 'Schwarzes Loch', 'Künstliche Intelligenz', 'Sonnensystem'],
+        resultsHeading: 'Häufig gestellte Fragen',
+        searching: 'Wikipedia wird durchsucht...',
+        loadingContent: 'Artikel wird analysiert und FAQ generiert...',
+        noResultsTitle: 'Kein Artikel gefunden',
+        noResultsDesc: 'Kein Wikipedia-Artikel für „{query}“ gefunden. Prüfe bitte die Schreibweise oder suche ein allgemeineres Thema.',
+        disambigTitle: 'Mehrere Bedeutungen gefunden',
+        disambigDesc: 'Dieser Begriff hat auf Wikipedia mehrere Bedeutungen. Bitte wähle eines der folgenden Themen:',
+        tooShortTitle: 'Artikel zu kurz',
+        tooShortDesc: 'Der Artikel zu „{query}“ ist zu kurz für ein vollständiges FAQ. Bitte wähle ein ausführlicheres Thema.',
+        offlineTitle: 'Keine Internetverbindung',
+        offlineDesc: 'Bitte überprüfe deine Netzwerkverbindung. Eine Internetverbindung ist für Wikipedia erforderlich.',
+        errorTitle: 'Suchfehler',
+        errorDesc: 'Beim Abrufen der Daten von Wikipedia ist ein Fehler aufgetreten: ',
+        credit: 'Informationen stammen aus Wikipedia, der freien Enzyklopädie.',
+        readArticle: 'Vollständigen Artikel auf Wikipedia lesen',
+        footerAbout: 'Einfaches FAQ-Akkordeon - Schulprojekt.',
+        footerDisclaimer: 'Kein API-Schlüssel, kein Benutzerkonto, kein Tracking. Wikipedia-API.',
+        introQuestion: function(topic) { return 'Was ist ' + topic + '?'; },
+        sectionQuestion: function(section, topic) { return 'Was sollte man über ' + section + ' bei ' + topic + ' wissen?'; },
+        skipSections: ['siehe auch', 'literatur', 'weblinks', 'einzelnachweise', 'quellen', 'anmerkungen', 'schriften']
+      }
+    };
+
+    /* ==========================================================================
+       DOM Elements
+       ========================================================================== */
+    var langSelect = document.getElementById('lang-select');
+    var themeToggleBtn = document.getElementById('theme-toggle');
+    var iconSun = document.getElementById('icon-sun');
+    var iconMoon = document.getElementById('icon-moon');
+
+    var brandText = document.getElementById('brand-text');
+    var heroBadge = document.getElementById('hero-badge');
+    var heroTitle = document.getElementById('hero-title');
+    var heroSubtitle = document.getElementById('hero-subtitle');
+
+    var searchForm = document.getElementById('search-form');
+    var searchInput = document.getElementById('search-input');
+    var searchBtnText = document.getElementById('search-btn-text');
+    var sampleLabel = document.getElementById('sample-label');
+    var sampleChipsContainer = document.getElementById('sample-chips-container');
+
+    var statusArea = document.getElementById('status-area');
+    var resultsSection = document.getElementById('results-section');
+    var resultsHeading = document.getElementById('results-heading');
+    var resultsTopicBadge = document.getElementById('results-topic-badge');
+    var accordionContainer = document.getElementById('accordion-container');
+    var footerCreditText = document.getElementById('footer-credit-text');
+    var wikiArticleLink = document.getElementById('wiki-article-link');
+    var footerLinkText = document.getElementById('footer-link-text');
+    var pageFooterAbout = document.getElementById('page-footer-about');
+    var pageFooterDisclaimer = document.getElementById('page-footer-disclaimer');
+
+    /* Active language code (defaults to 'en') */
+    var currentLang = 'en';
+
+    /* ==========================================================================
+       Theme Management (Light / Dark Mode)
+       ========================================================================== */
+    function initTheme() {
+      var savedTheme = null;
+      try {
+        savedTheme = localStorage.getItem('faq_accordion_theme');
+      } catch (e) {
+        // LocalStorage might be disabled in private browsing or file:// context
+      }
+
+      var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      var activeTheme = savedTheme ? savedTheme : (prefersDark ? 'dark' : 'light');
+      applyTheme(activeTheme);
+    }
+
+    function applyTheme(theme) {
+      if (theme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        iconSun.style.display = 'block';
+        iconMoon.style.display = 'none';
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+        iconSun.style.display = 'none';
+        iconMoon.style.display = 'block';
+      }
+      try {
+        localStorage.setItem('faq_accordion_theme', theme);
+      } catch (e) {}
+    }
+
+    themeToggleBtn.addEventListener('click', function() {
+      var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      applyTheme(isDark ? 'light' : 'dark');
+    });
+
+    /* ==========================================================================
+       Language / UI Text Updates
+       ========================================================================== */
+    function setLanguage(lang) {
+      if (!I18N[lang]) lang = 'en';
+      currentLang = lang;
+      var dict = I18N[lang];
+
+      brandText.textContent = dict.brand;
+      heroBadge.textContent = dict.badge;
+      heroTitle.textContent = dict.title;
+      heroSubtitle.textContent = dict.subtitle;
+      searchInput.placeholder = dict.placeholder;
+      searchBtnText.textContent = dict.searchBtn;
+      sampleLabel.textContent = dict.tryLabel;
+      resultsHeading.textContent = dict.resultsHeading;
+      footerCreditText.textContent = dict.credit;
+      footerLinkText.textContent = dict.readArticle;
+      pageFooterAbout.textContent = dict.footerAbout;
+      pageFooterDisclaimer.textContent = dict.footerDisclaimer;
+
+      // Update sample suggestion chips
+      renderSampleChips(dict.samples);
+    }
+
+    function renderSampleChips(samples) {
+      // Clear existing chips using standard DOM loop (no replaceChildren for older browser support)
+      while (sampleChipsContainer.firstChild) {
+        sampleChipsContainer.removeChild(sampleChipsContainer.firstChild);
+      }
+
+      for (var i = 0; i < samples.length; i++) {
+        var chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'sample-chip';
+        chip.textContent = samples[i];
+        chip.addEventListener('click', (function(topic) {
+          return function() {
+            searchInput.value = topic;
+            executeSearch(topic);
+          };
+        })(samples[i]));
+        sampleChipsContainer.appendChild(chip);
+      }
+    }
+
+    langSelect.addEventListener('change', function() {
+      setLanguage(langSelect.value);
+      // If there's an ongoing or existing search, clear status
+      clearStatus();
+      resultsSection.style.display = 'none';
+    });
+
+    /* ==========================================================================
+       Status & Error UI Rendering
+       ========================================================================== */
+    function clearStatus() {
+      while (statusArea.firstChild) {
+        statusArea.removeChild(statusArea.firstChild);
+      }
+    }
+
+    function showLoading(message) {
+      clearStatus();
+      resultsSection.style.display = 'none';
+
+      var wrapper = document.createElement('div');
+      wrapper.className = 'loading-container';
+
+      var spinner = document.createElement('div');
+      spinner.className = 'loading-spinner';
+
+      var label = document.createElement('div');
+      label.className = 'loading-label';
+      label.textContent = message || I18N[currentLang].searching;
+
+      wrapper.appendChild(spinner);
+      wrapper.appendChild(label);
+      statusArea.appendChild(wrapper);
+    }
+
+    function showStatusCard(type, titleText, descText, extraElement) {
+      clearStatus();
+      resultsSection.style.display = 'none';
+
+      var card = document.createElement('div');
+      card.className = 'status-card ' + type;
+
+      var iconBox = document.createElement('div');
+      iconBox.className = 'status-icon-box';
+
+      // SVG Icon based on type
+      var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('width', '24');
+      svg.setAttribute('height', '24');
+      svg.setAttribute('viewBox', '0 0 24 24');
+      svg.setAttribute('fill', 'none');
+      svg.setAttribute('stroke', 'currentColor');
+      svg.setAttribute('stroke-width', '2');
+      svg.setAttribute('stroke-linecap', 'round');
+      svg.setAttribute('stroke-linejoin', 'round');
+
+      if (type === 'error') {
+        var c1 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        c1.setAttribute('cx', '12'); c1.setAttribute('cy', '12'); c1.setAttribute('r', '10');
+        var l1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        l1.setAttribute('x1', '12'); l1.setAttribute('y1', '8'); l1.setAttribute('x2', '12'); l1.setAttribute('y2', '12');
+        var l2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        l2.setAttribute('x1', '12'); l2.setAttribute('y1', '16'); l2.setAttribute('x2', '12.01'); l2.setAttribute('y2', '16');
+        svg.appendChild(c1); svg.appendChild(l1); svg.appendChild(l2);
+      } else if (type === 'warning') {
+        var p1 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        p1.setAttribute('d', 'M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z');
+        var l3 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        l3.setAttribute('x1', '12'); l3.setAttribute('y1', '9'); l3.setAttribute('x2', '12'); l3.setAttribute('y2', '13');
+        var l4 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        l4.setAttribute('x1', '12'); l4.setAttribute('y1', '17'); l4.setAttribute('x2', '12.01'); l4.setAttribute('y2', '17');
+        svg.appendChild(p1); svg.appendChild(l3); svg.appendChild(l4);
+      } else {
+        var c2 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        c2.setAttribute('cx', '12'); c2.setAttribute('cy', '12'); c2.setAttribute('r', '10');
+        var l5 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        l5.setAttribute('x1', '12'); l5.setAttribute('y1', '16'); l5.setAttribute('x2', '12'); l5.setAttribute('y2', '12');
+        var l6 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        l6.setAttribute('x1', '12'); l6.setAttribute('y1', '8'); l6.setAttribute('x2', '12.01'); l6.setAttribute('y2', '8');
+        svg.appendChild(c2); svg.appendChild(l5); svg.appendChild(l6);
+      }
+      iconBox.appendChild(svg);
+
+      var bodyBox = document.createElement('div');
+      bodyBox.style.flex = '1';
+
+      var title = document.createElement('div');
+      title.className = 'status-title';
+      title.textContent = titleText;
+
+      var desc = document.createElement('div');
+      desc.className = 'status-desc';
+      desc.textContent = descText;
+
+      bodyBox.appendChild(title);
+      bodyBox.appendChild(desc);
+
+      if (extraElement) {
+        bodyBox.appendChild(extraElement);
+      }
+
+      card.appendChild(iconBox);
+      card.appendChild(bodyBox);
+      statusArea.appendChild(card);
+    }
+
+    /* ==========================================================================
+       Text Cleaning & Sentence Splitter (Compatible with older browsers)
+       NOTE: Avoids regex lookbehinds for full older Safari compatibility.
+       ========================================================================== */
+    function cleanWikipediaText(text) {
+      if (!text) return '';
+      return text
+        .replace(/\[\d+\]/g, '') // remove citations like [1], [24]
+        .replace(/\[(?:citation needed|edit|note \d+|clarification needed)\]/gi, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    function extractShortAnswer(text, maxSentences) {
+      var cleaned = cleanWikipediaText(text);
+      if (!cleaned) return '';
+
+      // Standard sentence boundary matcher: matches characters followed by . ! ? or Hindi/Marathi danda (।)
+      // Guaranteed safe in older Safari (no lookbehind)
+      var sentenceRegex = /([^.!?।]+(?:[.!?।]+|$))/g;
+      var rawMatches = cleaned.match(sentenceRegex) || [];
+
+      var sentences = [];
+      var buffer = '';
+      for (var i = 0; i < rawMatches.length; i++) {
+        var seg = rawMatches[i].trim();
+        if (!seg) continue;
+
+        // Skip abbreviations from triggering false sentence cuts (e.g. Dr., Prof., e.g., i.e., U.S.)
+        var isAbbr = /^(e\.g|i\.e|dr|mr|mrs|ms|prof|st|u\.s|approx|etc|[a-z])\.$/i.test(seg);
+        if (buffer) {
+          buffer += ' ' + seg;
+        } else {
+          buffer = seg;
+        }
+
+        if (!isAbbr && buffer.length > 15) {
+          sentences.push(buffer);
+          buffer = '';
+          if (sentences.length >= maxSentences) break;
+        }
+      }
+
+      if (buffer && sentences.length < maxSentences) {
+        sentences.push(buffer);
+      }
+
+      var result = sentences.slice(0, maxSentences).join(' ');
+      if (!result) {
+        // Fallback if no punctuation was found
+        return cleaned.length > 280 ? cleaned.substring(0, 280) + '...' : cleaned;
+      }
+      return result;
+    }
+
+    /* ==========================================================================
+       Article Section Parser
+       ========================================================================== */
+    function parseArticleContent(fullExtract, pageTitle, dict) {
+      if (!fullExtract || fullExtract.trim().length === 0) {
+        return [];
+      }
+
+      var skipList = dict.skipSections;
+
+      // Match headings: == Title == or === Subtitle ===
+      // Standard non-lookbehind regex: /(?:^|\n)(={2,4})\s*([^=\n]+?)\s*\1\s*(?:\n|$)/g
+      var headingRegex = /(?:^|\n)(={2,4})\s*([^=\n]+?)\s*\1\s*(?:\n|$)/g;
+      var matches = [];
+      var match;
+
+      while ((match = headingRegex.exec(fullExtract)) !== null) {
+        matches.push({
+          index: match.index,
+          matchLength: match[0].length,
+          level: match[1].length,
+          title: match[2].trim()
+        });
+      }
+
+      var qaList = [];
+
+      // 1. Extract Introduction (everything before the first heading)
+      var introEnd = matches.length > 0 ? matches[0].index : fullExtract.length;
+      var introRaw = fullExtract.substring(0, introEnd).trim();
+      var introAnswer = extractShortAnswer(introRaw, 3);
+
+      if (introAnswer && introAnswer.length > 25) {
+        qaList.push({
+          question: dict.introQuestion(pageTitle),
+          answer: introAnswer
+        });
+      }
+
+      // Helper to check if section title should be ignored
+      function isSkipped(title) {
+        var lower = title.toLowerCase();
+        for (var s = 0; s < skipList.length; s++) {
+          if (lower.indexOf(skipList[s]) !== -1) {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      // 2. Extract Sections
+      var sectionCandidates = [];
+      for (var i = 0; i < matches.length; i++) {
+        var m = matches[i];
+        if (isSkipped(m.title)) continue;
+
+        var startContent = m.index + m.matchLength;
+        var endContent = (i + 1 < matches.length) ? matches[i + 1].index : fullExtract.length;
+        var sectionRaw = fullExtract.substring(startContent, endContent).trim();
+
+        // Must have meaningful content (> 40 characters)
+        if (sectionRaw.length > 40) {
+          var answer = extractShortAnswer(sectionRaw, 3);
+          if (answer && answer.length > 30) {
+            sectionCandidates.push({
+              level: m.level,
+              title: m.title,
+              answer: answer
+            });
+          }
+        }
+      }
+
+      // Prefer top-level sections (==), but use subsections (===) if needed to reach about 6 questions
+      var topLevel = [];
+      var subLevel = [];
+      for (var k = 0; k < sectionCandidates.length; k++) {
+        if (sectionCandidates[k].level === 2) {
+          topLevel.push(sectionCandidates[k]);
+        } else {
+          subLevel.push(sectionCandidates[k]);
+        }
+      }
+
+      // Select up to 5 sections to reach total of ~6 questions (1 intro + 5 sections)
+      var targetSections = topLevel.slice(0, 5);
+      if (targetSections.length < 5) {
+        var needed = 5 - targetSections.length;
+        targetSections = targetSections.concat(subLevel.slice(0, needed));
+      }
+
+      for (var j = 0; j < targetSections.length; j++) {
+        var sec = targetSections[j];
+        var qText;
+        // If the heading is already formatted as a question, use it as is
+        if (sec.title.slice(-1) === '?' || sec.title.slice(-1) === '؟') {
+          qText = sec.title;
+        } else {
+          qText = dict.sectionQuestion(sec.title, pageTitle);
+        }
+        qaList.push({
+          question: qText,
+          answer: sec.answer
+        });
+      }
+
+      return qaList;
+    }
+
+    /* ==========================================================================
+       Accordion DOM Builder & Interactions
+       NOTE: Strict requirement 8 - uses textContent for all Wikipedia data.
+       ========================================================================== */
+    function renderAccordion(qaList, pageTitle, lang) {
+      clearStatus();
+      while (accordionContainer.firstChild) {
+        accordionContainer.removeChild(accordionContainer.firstChild);
+      }
+
+      resultsTopicBadge.textContent = pageTitle;
+      var wikiUrl = 'https://' + lang + '.wikipedia.org/wiki/' + encodeURIComponent(pageTitle.replace(/ /g, '_'));
+      wikiArticleLink.href = wikiUrl;
+
+      for (var i = 0; i < qaList.length; i++) {
+        var item = document.createElement('div');
+        item.className = 'faq-item';
+        item.id = 'faq-item-' + i;
+
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'faq-question-btn';
+        btn.id = 'faq-btn-' + i;
+        btn.setAttribute('aria-expanded', 'false');
+        btn.setAttribute('aria-controls', 'faq-ans-' + i);
+
+        var numBadge = document.createElement('span');
+        numBadge.className = 'faq-q-number';
+        numBadge.textContent = (i + 1);
+
+        var qTextSpan = document.createElement('span');
+        qTextSpan.className = 'faq-question-text';
+        // SECURE: Use textContent
+        qTextSpan.textContent = qaList[i].question;
+
+        var iconWrapper = document.createElement('span');
+        iconWrapper.className = 'faq-icon-wrapper';
+        iconWrapper.setAttribute('aria-hidden', 'true');
+
+        // Plus icon SVG
+        var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('class', 'faq-icon');
+        svg.setAttribute('viewBox', '0 0 24 24');
+        svg.setAttribute('fill', 'none');
+        svg.setAttribute('stroke', 'currentColor');
+        svg.setAttribute('stroke-width', '2.5');
+        svg.setAttribute('stroke-linecap', 'round');
+        svg.setAttribute('stroke-linejoin', 'round');
+
+        var line1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line1.setAttribute('x1', '12'); line1.setAttribute('y1', '5');
+        line1.setAttribute('x2', '12'); line1.setAttribute('y2', '19');
+
+        var line2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line2.setAttribute('x1', '5'); line2.setAttribute('y1', '12');
+        line2.setAttribute('x2', '19'); line2.setAttribute('y2', '12');
+
+        svg.appendChild(line1);
+        svg.appendChild(line2);
+        iconWrapper.appendChild(svg);
+
+        btn.appendChild(numBadge);
+        btn.appendChild(qTextSpan);
+        btn.appendChild(iconWrapper);
+
+        // Answer Panel
+        var panel = document.createElement('div');
+        panel.className = 'faq-answer-panel';
+        panel.id = 'faq-ans-' + i;
+        panel.setAttribute('role', 'region');
+        panel.setAttribute('aria-labelledby', 'faq-btn-' + i);
+
+        var content = document.createElement('div');
+        content.className = 'faq-answer-content';
+
+        var p = document.createElement('p');
+        p.className = 'faq-answer-text';
+        // SECURE: Use textContent
+        p.textContent = qaList[i].answer;
+
+        content.appendChild(p);
+        panel.appendChild(content);
+
+        item.appendChild(btn);
+        item.appendChild(panel);
+
+        // Click handler with single-open guarantee
+        btn.addEventListener('click', (function(currentItem, currentBtn, currentPanel) {
+          return function() {
+            var isCurrentlyOpen = currentItem.classList.contains('is-open');
+
+            // 1. Close all other items in the accordion
+            var allItems = accordionContainer.querySelectorAll('.faq-item');
+            for (var a = 0; a < allItems.length; a++) {
+              if (allItems[a] !== currentItem && allItems[a].classList.contains('is-open')) {
+                closeItem(allItems[a]);
+              }
+            }
+
+            // 2. Toggle this item
+            if (isCurrentlyOpen) {
+              closeItem(currentItem);
+            } else {
+              openItem(currentItem);
+            }
+          };
+        })(item, btn, panel));
+
+        accordionContainer.appendChild(item);
+      }
+
+      // Show results section
+      resultsSection.style.display = 'block';
+
+      // Automatically open the first question for an inviting experience
+      if (accordionContainer.firstChild) {
+        openItem(accordionContainer.firstChild);
+      }
+
+      // Scroll smoothly to results
+      resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function openItem(item) {
+      item.classList.add('is-open');
+      var btn = item.querySelector('.faq-question-btn');
+      var panel = item.querySelector('.faq-answer-panel');
+      if (btn) btn.setAttribute('aria-expanded', 'true');
+      if (panel) {
+        panel.style.maxHeight = panel.scrollHeight + 'px';
+      }
+    }
+
+    function closeItem(item) {
+      item.classList.remove('is-open');
+      var btn = item.querySelector('.faq-question-btn');
+      var panel = item.querySelector('.faq-answer-panel');
+      if (btn) btn.setAttribute('aria-expanded', 'false');
+      if (panel) {
+        panel.style.maxHeight = '0px';
+      }
+    }
+
+    /* ==========================================================================
+       Wikipedia Search Execution & API Fetching
+       ========================================================================== */
+    function executeSearch(query) {
+      var trimmed = query.trim();
+      if (!trimmed) return;
+
+      var lang = currentLang;
+      var dict = I18N[lang];
+
+      // Offline detection
+      if (typeof navigator.onLine !== 'undefined' && !navigator.onLine) {
+        showStatusCard('error', dict.offlineTitle, dict.offlineDesc);
+        return;
+      }
+
+      showLoading(dict.searching);
+
+      // Step 1: Search Wikipedia for matching article titles
+      var searchEndpoint = 'https://' + lang + '.wikipedia.org/w/api.php?action=query&list=search&srsearch=' + 
+        encodeURIComponent(trimmed) + '&utf8=&format=json&origin=*';
+
+      fetch(searchEndpoint)
+        .then(function(res) {
+          if (!res.ok) {
+            throw new Error('HTTP Status ' + res.status + ' (' + res.statusText + ')');
+          }
+          return res.json();
+        })
+        .then(function(searchData) {
+          if (!searchData || !searchData.query || !searchData.query.search || searchData.query.search.length === 0) {
+            // Case 1: No article found
+            var desc = dict.noResultsDesc.replace('{query}', trimmed);
+            showStatusCard('info', dict.noResultsTitle, desc);
+            return;
+          }
+
+          var searchResults = searchData.query.search;
+          var topResult = searchResults[0];
+          var pageTitle = topResult.title;
+
+          // Check if top result is explicitly a disambiguation page by title
+          var isDisambigTitle = pageTitle.toLowerCase().indexOf('(disambiguation)') !== -1 ||
+                                pageTitle.indexOf('(बहुविकल्पी)') !== -1 ||
+                                pageTitle.indexOf('(निःसंदिग्धीकरण)') !== -1 ||
+                                pageTitle.indexOf('(desambiguación)') !== -1 ||
+                                pageTitle.indexOf('(homonymie)') !== -1 ||
+                                pageTitle.indexOf('(Begriffsklärung)') !== -1;
+
+          showLoading(dict.loadingContent);
+
+          // Step 2: Fetch article extract & pageprops to detect disambiguation and get section text
+          var contentEndpoint = 'https://' + lang + '.wikipedia.org/w/api.php?action=query&prop=extracts|pageprops&explaintext=1&titles=' + 
+            encodeURIComponent(pageTitle) + '&format=json&origin=*&redirects=1';
+
+          return fetch(contentEndpoint)
+            .then(function(res) {
+              if (!res.ok) {
+                throw new Error('HTTP Status ' + res.status);
+              }
+              return res.json();
+            })
+            .then(function(contentData) {
+              if (!contentData || !contentData.query || !contentData.query.pages) {
+                var desc = dict.noResultsDesc.replace('{query}', trimmed);
+                showStatusCard('info', dict.noResultsTitle, desc);
+                return;
+              }
+
+              var pages = contentData.query.pages;
+              var pageId = Object.keys(pages)[0];
+              var page = pages[pageId];
+
+              if (!page || pageId === '-1') {
+                var desc = dict.noResultsDesc.replace('{query}', trimmed);
+                showStatusCard('info', dict.noResultsTitle, desc);
+                return;
+              }
+
+              // Check if page has disambiguation property
+              var isDisambigProp = page.pageprops && ('disambiguation' in page.pageprops);
+
+              if (isDisambigTitle || isDisambigProp) {
+                // Case 2: Disambiguation topic with several meanings
+                var pillContainer = document.createElement('div');
+                pillContainer.className = 'disambig-suggestions';
+
+                // Display up to 5 alternative suggestions from search results
+                var shownCount = 0;
+                for (var s = 0; s < searchResults.length; s++) {
+                  var candidateTitle = searchResults[s].title;
+                  if (candidateTitle.toLowerCase() !== pageTitle.toLowerCase() && shownCount < 5) {
+                    var pill = document.createElement('button');
+                    pill.type = 'button';
+                    pill.className = 'disambig-pill';
+                    pill.textContent = candidateTitle;
+                    pill.addEventListener('click', (function(suggestion) {
+                      return function() {
+                        searchInput.value = suggestion;
+                        executeSearch(suggestion);
+                      };
+                    })(candidateTitle));
+                    pillContainer.appendChild(pill);
+                    shownCount++;
+                  }
+                }
+
+                showStatusCard('warning', dict.disambigTitle, dict.disambigDesc, pillContainer);
+                return;
+              }
+
+              var fullExtract = page.extract || '';
+
+              // Case 3: Parse QA pairs
+              var qaList = parseArticleContent(fullExtract, page.title, dict);
+
+              // Case 4: Article too short to make an FAQ
+              if (qaList.length < 2 || fullExtract.trim().length < 150) {
+                var shortDesc = dict.tooShortDesc.replace('{query}', page.title);
+                showStatusCard('warning', dict.tooShortTitle, shortDesc);
+                return;
+              }
+
+              // Render Accordion
+              renderAccordion(qaList, page.title, lang);
+            });
+        })
+        .catch(function(err) {
+          // Never fail silently! Clear error display for any network/parsing failure
+          var errorMsg = err && err.message ? err.message : String(err);
+          var fullDesc = dict.errorDesc + errorMsg;
+          if (!navigator.onLine) {
+            showStatusCard('error', dict.offlineTitle, dict.offlineDesc);
+          } else {
+            showStatusCard('error', dict.errorTitle, fullDesc);
+          }
+        });
+    }
+
+    /* ==========================================================================
+       Form & Event Listeners
+       ========================================================================== */
+    searchForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      executeSearch(searchInput.value);
+    });
+
+    // Detect browser returning online
+    window.addEventListener('online', function() {
+      // Clear offline error if present
+      var errCard = statusArea.querySelector('.status-card.error');
+      if (errCard) clearStatus();
+    });
+
+    // Window resize recalculates open panel maxHeight
+    window.addEventListener('resize', function() {
+      var openPanel = accordionContainer.querySelector('.faq-item.is-open .faq-answer-panel');
+      if (openPanel) {
+        openPanel.style.maxHeight = openPanel.scrollHeight + 'px';
+      }
+    });
+
+    /* ==========================================================================
+       Initialization
+       ========================================================================== */
+    initTheme();
+    setLanguage('en');
+  </script>
+</body>
+</html>
